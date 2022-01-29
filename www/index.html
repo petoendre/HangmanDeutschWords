@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+        <link rel="stylesheet" href="css/index.css">
+        <script type="text/javascript" src="js/words.js"></script>
+    </head>
+	<body onload="onDocLoad()">
+    <script>
+
+	
+onDocLoad = function () {
+  getWords();
+  var alphabet = ['a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', 'f', 'F', 'g', 'G', 'h', 'H',
+        'i', 'I', 'j', 'J', 'k', 'K', 'l', 'L', 'm', 'M', 'n', 'N', 'o', 'O', 'ö', 'p', 'P', 'q', 'Q', 'r', 'R', 's', 'S',
+        't', 'T', 'ü', 'u', 'U', 'v', 'V', 'w', 'W', 'x', 'X', 'y', 'Y', 'z', 'Z', 'ß', 'ä', '/'];
+  
+  // Get elements
+  var showLives = document.getElementById("mylives");
+  var showCatagory = document.getElementById("scatagory");
+  var getHint = document.getElementById("hint");
+  var showClue = document.getElementById("clue");
+  var showNemet = document.getElementById("nemetul");
+
+  // create alphabet ul
+  var buttons = function () {
+    myButtons = document.getElementById('buttons');
+    letters = document.createElement('ul');
+
+    for (var i = 0; i < alphabet.length; i++) {
+      letters.id = 'alphabet';
+      list = document.createElement('button');
+      list.id = 'letter';
+      list.innerHTML = alphabet[i];
+      check();
+      myButtons.appendChild(letters);
+      letters.appendChild(list);
+    }
+  }
+
+  // Create geusses
+   result = function () {
+    wordHolder = document.getElementById('hold');
+    correct = document.createElement('ul');
+
+    for (var i = 0; i < word.length; i++) {
+      correct.setAttribute('id', 'my-word');
+      guess = document.createElement('li');
+      guess.setAttribute('class', 'guess');
+      if (word[i] === "-") {
+        guess.innerHTML = "-";
+        space = 1;
+      } else {
+        guess.innerHTML = "_";
+      }
+
+      geusses.push(guess);
+      wordHolder.appendChild(correct);
+      correct.appendChild(guess);
+    }
+  }
+  
+  // Show lives
+   comments = function () {
+    showLives.innerHTML = "You have " + lives + " lives";
+    if (lives < 1) {
+      showLives.innerHTML = "Game Over! The word is: " + word;
+	  document.getElementById("hold").style.display = "none";
+    }
+    for (var i = 0; i < geusses.length; i++) {
+      if (counter + space === geusses.length) {
+        showLives.innerHTML = "You Win!";
+		break;
+      }
+    }
+	
+  }
+      // Animate man
+  var animate = function () {
+    var drawMe = lives ;
+    drawArray[drawMe]();
+  }
+  
+   // Hangman
+  canvas =  function(){
+
+    myStickman = document.getElementById("stickman");
+    context = myStickman.getContext('2d');
+    context.beginPath();
+    context.strokeStyle = "#fff";
+    context.lineWidth = 2;
+  };
+  
+    head = function(){
+      myStickman = document.getElementById("stickman");
+      context = myStickman.getContext('2d');
+      context.beginPath();
+      context.arc(60, 25, 10, 0, Math.PI*2, true);
+      context.stroke();
+    }
+    
+  draw = function($pathFromx, $pathFromy, $pathTox, $pathToy) {
+    
+    context.moveTo($pathFromx, $pathFromy);
+    context.lineTo($pathTox, $pathToy);
+    context.stroke(); 
+}
+
+   frame1 = function() {
+     draw (0, 150, 150, 150);
+   };
+   
+   frame2 = function() {
+     draw (10, 0, 10, 600);
+   };
+  
+   frame3 = function() {
+     draw (0, 5, 70, 5);
+   };
+  
+   frame4 = function() {
+     draw (60, 5, 60, 15);
+   };
+  
+   torso = function() {
+     draw (60, 36, 60, 70);
+   };
+  
+   rightArm = function() {
+     draw (60, 46, 100, 50);
+   };
+  
+   leftArm = function() {
+     draw (60, 46, 20, 50);
+   };
+  
+   rightLeg = function() {
+     draw (60, 70, 100, 100);
+   };
+  
+   leftLeg = function() {
+     draw (60, 70, 20, 100);
+   };
+  
+  drawArray = [rightLeg, leftLeg, rightArm, leftArm,  torso,  head, frame4, frame3, frame2, frame1]; 
+
+
+  // OnClick Function
+   check = function () {
+    list.onclick = function () {
+      var geuss = (this.innerHTML);
+      this.setAttribute("class", "active");
+      this.onclick = null;
+      for (var i = 0; i < word.length; i++) {
+        if (word[i] === geuss) {
+          geusses[i].innerHTML = geuss;
+          counter += 1;
+        } 
+      }
+      var j = (word.indexOf(geuss));
+      if (j === -1) {
+        lives -= 1;
+        comments();
+        animate();
+      } else {
+        comments();
+      }
+    }
+  }
+  
+  var index;   
+  // Play
+  play = function () {
+  
+	index = Math.floor(Math.random() * wholeWords.length);
+	wholeWord = wholeWords[index];
+	splittedWord = wholeWord.split("-");
+	word = splittedWord[0];
+    word = word.replace(/\s/g, "-");
+    buttons();
+
+    geusses = [ ];
+    lives = 10;
+    counter = 0;
+    space = 0;
+    result();
+    comments();
+    canvas();
+	document.getElementById("hold").style.display = "block";
+  }
+
+  play();
+  showClue.innerHTML = "Magyarul: - " + splittedWord[1];
+  showNemet.innerHTML = "Németül: - ";
+  
+  // Hint/ Nemetül
+  hint.onclick = function() {
+
+	showNemet.innerHTML = "Németül: - " + splittedWord[0];
+  };
+
+   // Reset
+  document.getElementById('reset').onclick = function() {
+    correct.parentNode.removeChild(correct);
+    letters.parentNode.removeChild(letters);
+	showNemet.innerHTML = "Németül: - ";
+    context.clearRect(0, 0, 400, 400);
+    play();
+	showClue.innerHTML = "Magyarul: - " + splittedWord[1];
+  }
+}
+	
+    </script>
+	<style>
+
+
+	</style>
+    <div class="container">
+   <p>Na mi lehet Németül?</p>
+</div>
+<div class="wrapper">
+    <div id="buttons">
+    </div>
+	<br><br><br><br>
+	<br></br>
+	<br></br>
+	<br></br>
+    <div id="hold" style="display: block;">
+    </div>
+	<p id="myword"></p>
+    <p id="mylives"></p>
+    <p id="clue">Clue -</p>
+	<p id="nemetul">Németül: </p>
+	<canvas id="stickman">This Text will show if the Browser does NOT support HTML5 Canvas tag</canvas>
+    <div class="container">
+      <button class="btn btn-default btn-sm" id="hint">Németül</button>
+      <button class="btn btn-default btn-sm" id="reset">Új játék</button>
+    </div>
+</div>
+    
+    </body>
+</html>

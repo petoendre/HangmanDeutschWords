@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+        <script type="text/javascript" src="cordova.js"></script>
+    </head>
+    <!-- <body onload="onDocLoad()" onresize="onResize()"> -->
+	<body onload="onDocLoad()">
+    <script>
+    function onDocLoad() {
+		firstload();
+    }
+
+	
+firstload = function () {
+
+  var alphabet = ['a', 'A', 'b', 'B', 'c', 'C', 'd', 'D', 'e', 'E', 'f', 'F', 'g', 'G', 'h', 'H',
+        'i', 'I', 'j', 'J', 'k', 'K', 'l', 'L', 'm', 'M', 'n', 'N', 'o', 'O', 'ö', 'p', 'P', 'q', 'Q', 'r', 'R', 's', 'S',
+        't', 'T', 'ü', 'u', 'U', 'v', 'V', 'w', 'W', 'x', 'X', 'y', 'Y', 'z', 'Z', 'ß', 'ä', '/'];
+  
+  var words;
+  var wholeWords;
+  var wholeWord;
+  var splittedWord;  
+  var categories;  // Array of topics
+  var chosenCategory;     // Selected catagory
+  var getHint ;          // Word getHint
+  var word ;              // Selected word
+  var guess ;             // Geuss
+  var geusses = [ ];      // Stored geusses
+  var lives ;             // Lives
+  var counter ;           // Count correct geusses
+  var space;              // Number of spaces in word '-'
+  // var name;					// name of user
+  // var score = 0; // Score of the user
+
+  // Get elements
+  var showLives = document.getElementById("mylives");
+  var showCatagory = document.getElementById("scatagory");
+  var getHint = document.getElementById("hint");
+  var showClue = document.getElementById("clue");
+  var showNemet = document.getElementById("nemetul");
+  //var scoreField = document.getElementById("score");
+
+  // create alphabet ul
+  var buttons = function () {
+    myButtons = document.getElementById('buttons');
+    letters = document.createElement('ul');
+
+    for (var i = 0; i < alphabet.length; i++) {
+      letters.id = 'alphabet';
+      list = document.createElement('button');
+      list.id = 'letter';
+      list.innerHTML = alphabet[i];
+      check();
+      myButtons.appendChild(letters);
+      letters.appendChild(list);
+    }
+  }
+
+  // Create geusses ul
+   result = function () {
+    wordHolder = document.getElementById('hold');
+    correct = document.createElement('ul');
+
+    for (var i = 0; i < word.length; i++) {
+      correct.setAttribute('id', 'my-word');
+      guess = document.createElement('li');
+      guess.setAttribute('class', 'guess');
+      if (word[i] === "-") {
+        guess.innerHTML = "-";
+        space = 1;
+      } else {
+        guess.innerHTML = "_";
+      }
+
+      geusses.push(guess);
+      wordHolder.appendChild(correct);
+      correct.appendChild(guess);
+    }
+  }
+  
+  // Show lives
+   comments = function () {
+    showLives.innerHTML = "You have " + lives + " lives";
+    if (lives < 1) {
+      showLives.innerHTML = "Game Over! The word is: " + word;
+	  document.getElementById("hold").style.display = "none";
+    }
+    for (var i = 0; i < geusses.length; i++) {
+      if (counter + space === geusses.length) {
+        showLives.innerHTML = "You Win!";
+		//scoreField.innerHTML = "Pontok: " + ++score;
+		break;
+      }
+    }
+	
+  }
+      // Animate man
+  var animate = function () {
+    var drawMe = lives ;
+    drawArray[drawMe]();
+  }
+  
+   // Hangman
+  canvas =  function(){
+
+    myStickman = document.getElementById("stickman");
+    context = myStickman.getContext('2d');
+    context.beginPath();
+    context.strokeStyle = "#fff";
+    context.lineWidth = 2;
+  };
+  
+    head = function(){
+      myStickman = document.getElementById("stickman");
+      context = myStickman.getContext('2d');
+      context.beginPath();
+      context.arc(60, 25, 10, 0, Math.PI*2, true);
+      context.stroke();
+    }
+    
+  draw = function($pathFromx, $pathFromy, $pathTox, $pathToy) {
+    
+    context.moveTo($pathFromx, $pathFromy);
+    context.lineTo($pathTox, $pathToy);
+    context.stroke(); 
+}
+
+   frame1 = function() {
+     draw (0, 150, 150, 150);
+   };
+   
+   frame2 = function() {
+     draw (10, 0, 10, 600);
+   };
+  
+   frame3 = function() {
+     draw (0, 5, 70, 5);
+   };
+  
+   frame4 = function() {
+     draw (60, 5, 60, 15);
+   };
+  
+   torso = function() {
+     draw (60, 36, 60, 70);
+   };
+  
+   rightArm = function() {
+     draw (60, 46, 100, 50);
+   };
+  
+   leftArm = function() {
+     draw (60, 46, 20, 50);
+   };
+  
+   rightLeg = function() {
+     draw (60, 70, 100, 100);
+   };
+  
+   leftLeg = function() {
+     draw (60, 70, 20, 100);
+   };
+  
+  drawArray = [rightLeg, leftLeg, rightArm, leftArm,  torso,  head, frame4, frame3, frame2, frame1]; 
+
+
+  // OnClick Function
+   check = function () {
+    list.onclick = function () {
+      var geuss = (this.innerHTML);
+      this.setAttribute("class", "active");
+      this.onclick = null;
+      for (var i = 0; i < word.length; i++) {
+        if (word[i] === geuss) {
+          geusses[i].innerHTML = geuss;
+          counter += 1;
+        } 
+      }
+      var j = (word.indexOf(geuss));
+      if (j === -1) {
+        lives -= 1;
+        comments();
+        animate();
+      } else {
+        comments();
+      }
+    }
+  }
+  
+  var index;   
+  // Play
+  play = function () {
+	//categories = [["die familie","die mutter"]];
+	//words = ["die familie","die mutter","in der Nähe","der Großvater"];
+	wholeWords = ["die Familie-család","Die Mutter-anya","das Gebäude-épület","der Großvater-nagyapa",
+	"Der Vater-apa","Der Bruder-fiú testvér","Die Schwester-lány testvér","die Geschwister-testvérek",
+	"Das Kind-gyerek","die Tochter-lánya","Der Sohn-fia","Die Frau-nő, feleség","Der Mann-férfi, férj",
+	"der Großvater-nagyapa","die Großmutter-nagymama","Der Onkel-nagybácsi",
+	"Die Tante-nagynéni","das Haus-ház",
+"die Wohnung-lakás",
+"das Gebäude-épület",
+"das Stock-emelet",
+"das Zimmer-szoba",
+"die Küche-konyha",
+"das WC-Wc",
+"das Badezimmer-fürdőszoba",
+"das Wohnzimmer-nappali",
+"das Schlafzimmer-hálószoba",
+"das Kinderzimmer-gyerekszoba",
+"das Arbeitszimmer-dolgozószoba",
+"der Keller-pince",
+"der Balkon-erkély",
+"die Tür-ajtó",
+"das Fenster-ablak",
+"die Wand-fal",
+"gern-szívesen, örömmel",
+"hübsch-csinos, szép",
+"der Zwilling-iker",
+"bestimmt-bizonyára",
+"gleich-hasonló, egyforma, azonnal",
+"wieder-ismét",
+"in der Nähe-közelben",
+"anstrengend-megerőltető",
+"jetzt-most",
+"ein paar-egy pár, egy néhány",
+"der Mitarbeiter-munkatárs",
+"lieblings-kedvenc",
+"bei dir-nálad",
+"zirka-kb",
+"ein bisschen-egy kicsit",
+"manchmal-néha",
+"die Zeitung-újság",
+"gute Frage-jó kérdés",
+"schon-már",
+"noch-még",
+"benutzen-használni",
+"erklären-magyarázni",
+"das Gefühl-érzés",
+"das Möbel-bútor",
+"der Tisch-asztal",
+"der Stuhl-szék",
+"der Schrank-szekrény",
+"das Regal-polc",
+"der Teppich-szőnyeg",
+"das Bett-ágy",
+"der Schreibtisch-íróasztal",
+"das Sofa-kanapé",
+"die Lampe-lámpa",
+"das Bild-kép",
+"der Nachttisch-éjjeli szekrény",
+"der Spiegel-tükör",
+"die Decke-takaró",
+"das Kissen-párna",
+"der Herd-tűzhely",
+"der Backofen-sütő",
+"das Spülbecken-mosogató",
+"der Kühlschrank-hűtő",
+"die Waschmaschine-mosógép",
+"der Staubsauger-porszívó",
+"der Heizkörper-radiátor",
+"die Zeit-idő",
+"die Sekunde-másodperc",
+"die Minute-perc",
+"die Stunde-óra (időtartam, tanóra)",
+"die Uhr-óra (időpont, eszköz)",
+"der Tag-nap",
+"die Woche-hét",
+"der Monat-hónap",
+"das Jahr-év",
+"heute-ma",
+"morgen-holnap",
+"übermorgen-holnapután",
+"gestern-tegnap",
+"vorgestern-tegnapelőtt",
+"der Morgen-reggel",
+"der Vormittag-délelőtt",
+"Der Mittag-dél",
+"der Nachmittag-délután",
+"der Abend-este",
+"die Nacht-éjszaka",
+"die Vergangenheit-múlt",
+"die Gegenwart-jelen",
+"die Zukunft-jövő",
+"Wie Spät ist es?-Mennyi az idő?",
+"Wieviel Uhr ist es?-Hány óra van?",
+"am Wochenende-hétvégén",
+"am Freitag-pénteken",
+"Wann gehst du schlafen?-Mikor mész aludni?",
+"der Verkäufer-eladó(foglalkozás)",
+"auch-valamint, is",
+"Wie bitte?-Hogyan kérem?",
+"bis bald-hamarosan találkozunk / viszlát késöbb",
+"er ist schon weg-(ő) elment már",
+"gleichfalls-szintén, viszont kívánom",
+"Oh wie gut, dass-ó dejó, hogy",
+"das Spielzeug-játékszer",
+"der Name-név",
+"die Farbe-szín, festék",
+"rund-kerek",
+"der Chef-főnök",
+"ziemlich-meglehetősen,eléggé",
+"der Verwandte-rokon",
+"der König-király",
+"die Königin-királynő",
+"der Vorteil-előny",
+"sein / war / ist gewesen-lenni",
+"haben / hatte / hat gehabt-birtokolni",
+"werden / wurde / ist geworden-valamivé válni",
+"lassen / ließ / hat gelassen-hagyni, engedni",
+"können / konnte / hat gekonnt-tud, képes vmire",
+"wissen / wusste / hat gewusst-tud, információt",
+"mögen / mochte / hat gemocht-kedvel",
+"müssen / musste / hat gemusst-kell, muszáj",
+"dürfen / durfte / hat gedurft-szabad, lehet",
+"sollen / sollte / hat gesollt-kellene",
+"wollen / wollte / hat gewollt-akar",
+"stehen / stand / hat gestanden-állni",
+"stellen / stellte / hat gestellt-állítani(vmit vhova)",
+"sitzen / saß / hat gesessen-ülni",
+"setzen / setzte / hat gesetzt-ültetni",
+"liegen / lag / hat gelegen-feküdni",
+"legen / legte / hat gelegt-fektetni",
+"gehen / ging / ist gegangen-menni",
+"kommen / kam / ist gekommen-jönni",
+"bleiben / blieb / ist geblieben-maradni",
+"abfahren / fuhr ab / ist abgefahren-indulni",
+"ankommen / kam an / ist angekommen-érkezni",
+"lieben / liebte / hat geliebt-szeretni",
+"hassen / hasste / hat gehasst-utálni",
+"Wer-ki?",
+"Wen-kit?",
+"Wem-kinek?",
+"Wessen-kié?",
+"Was-mi? mit?",
+"Wo-hol?",
+"Woher-honnan?",
+"Wohin-hová?",
+"Wie?-milyen?",
+"Wie viel-mennyi?",
+"Warum-miért?",
+"Wann-mikor?",
+"Wie lange-mennyi ideig?",
+"Seit wann-mióta?",
+"Welcher,Welche,Welches-melyik?",
+"Weil-mert",
+"Wenn-amikor",
+"der Krieg-háború",
+"das Thema-téma",
+"bekannt-ismerős",
+"die Kerze-gyertya",
+"gemütlich-kellemes,otthonos",
+"das Geschenk-ajándék",
+"wirklich-valóban",
+"die Meinung-vélemény",
+"das Geschpräch-beszélgetés",
+"das Dorf-falu",
+"das Ergebnis-eredmény",
+"die Lösung-megoldás",
+"die Regel-szabály",
+"der Erfolg-siker",
+"die Überraschung-meglepetés",
+"die Farbe-szín",
+"dunkel-sötét",
+"hell-világos",
+"breit-széles",
+"nervig-idegesítő",
+"eigentlich-tulajdonképpen,valójában",
+"verletzt-sérült",
+"empfindlich-érzékeny",
+"der Gedanke-gondolat",
+"hauptsächlich-főleg,főképp",
+"versuchen-megpróbál",
+"statt-helyett",
+"verdienen-keresni,megérdemelni",
+"der Gegensatz-ellentét",
+"das Gegenteil von-ellentéte valaminek",
+"groß-nagy",
+"klein-kicsi",
+"lang-hosszú",
+"kurz-rövid",
+"dick-kövér",
+"dünn-sovány",
+"warm-meleg",
+"kalt-hideg",
+"nass-vizes",
+"trocken-száraz",
+"hoch-magas",
+"tief-mély",
+"hell-világos",
+"dunkel-sötét",
+"freundlich-barátságos",
+"unfreundlich-barátságtalan",
+"fleißig-szorgalmas",
+"faul-lusta",
+"schnell-gyors",
+"langsam-lassú",
+"interessant-érdekes",
+"langweilig-unalmas",
+"klug-okos",
+"blöd-buta",
+"immer-mindig",
+"nie-soha",
+"oft-gyakran",
+"selten-ritkán",
+"alt-idős",
+"jung-fiatal",
+"neu-új",
+"alt-régi",
+"wahr-igaz",
+"falsch-hamis",
+"Das Wetter-időjárás",
+"es regnet-esik az eső",
+"es schneit-esik a hó",
+"es blitzt-villámlik",
+"es donnert-dörög az ég",
+"die Sonne scheint-süt a nap",
+"es ist heiß-meleg van",
+"es ist kalt-hideg van",
+"es ist windig-szeles",
+"die Wolke-felhő",
+"der Himmel-égbolt",
+"die Sonne-nap",
+"der Mond-hold",
+"zirka-körülbelül",
+"der Grad-hőfok",
+"Wie ist das Wetter bei dir?-Milyen az idő nálad?",
+"einfarbig-egyszínű",
+"vielfarbig-sokszínű",
+"einmalig-egyedi",
+"auffällig-feltűnő",
+"gerade-egyenes",
+"feiern-ünnepelni",
+"durchschnittlich-átlagos",
+"das Geschäft-bolt",
+"nachdem-miután",
+"der Eingang-bejárat",
+"der Ausgang-kijárat",
+"die Öffnungszeit-nyitvatartás",
+"die Kasse-kassza",
+"der Artikel-termék,áru",
+"das Wissen-tudás",
+"die Einladung-meghívás",
+"raten-tanácsolni,kitalálni",
+"insgesamt-összességében,együtt véve",
+"die Umwelt-környezet",
+"spannend-izgalmas,érdekfeszítő",
+"zurzeit-jelenleg",
+"die Geschichte-történet",
+"bemerken-észrevenni,megjegyezni",
+"gemeinsam-közösen",
+"betroffen von-érintett vmiben vmi által",
+"drücken-megnyom",
+"anwenden-felhasznál,alkalmaz",
+"vorbei-elmúlt,vége",
+"sofort-rögtön,azonnal",
+"einschalten/ schaltete ein /hat eingeschaltet-bekapcsolni",
+"kontrollieren/ kontrollierte/ hat kontrolliert-ellenőrizni",
+"lesen/ las/ hat gelesen-olvasni",
+"vermissen/ vermisste/ hat vermisst-hiányolni",
+"planen/ plante/ hat geplant-tervezni",
+"besuchen/ besuchte/ hat besucht-meglátogatni",
+"rufen/ rief/ hat gerufen-hívni",
+"anrufen/ rief an/ hat angerufen-felhívni",
+"lernen/ lernte/ hat gelernt-tanulni",
+"studieren/ studierte/ hat studiert-tanulni",
+"unterrichten/ unterrichtete/ hat unterrichtet-tanítani",
+"kennen/ kannte/ hat gekannt-ismerni",
+"nehmen/ nahm/ hat genommen-kér, vesz, elvesz",
+"brauchen/ brauchte/ hat gebraucht-szüksége van vmire",
+"bekommen/ bekam/ hat bekommen-kapni",
+"beginnen/ begann/ hat begonnen-kezdődik",
+"bewegen/ bewog/ hat bewogen-mozog",
+"bieten/ bot/ hat geboten-kínál",
+"bitten/ bat/ hat gebeten-kérni",
+"die Gesundheit-egészség",
+"die Krankheit-betegség",
+"die Empfindlichkeit-érzékenység",
+"der Schmerz-fájdalom",
+"schmerzhaft-fájdalmas",
+"die Erkältung-megfázás",
+"die Grippe-influenza",
+"die Lungenentzündung-tüdőgyulladás",
+"der Krebs-rák",
+"das Krankenhaus-kórház",
+"der Patient-páciens",
+"der Arzt/ die Ärztin-orvos/doktornő",
+"die Untersuchung-vizsgálat, nyomozás",
+"die Allergie-allergia"
+];
+
+    //chosenCategory = categories[Math.floor(Math.random() * categories.length)];
+    //word = chosenCategory[Math.floor(Math.random() * chosenCategory.length)];
+	index = Math.floor(Math.random() * wholeWords.length);
+	wholeWord = wholeWords[index];
+	splittedWord = wholeWord.split("-");
+	// word = words[index];
+	word = splittedWord[0];
+    word = word.replace(/\s/g, "-");
+    //console.log(word);
+	//console.log(index);
+    buttons();
+
+    geusses = [ ];
+    lives = 10;
+    counter = 0;
+    space = 0;
+    result();
+    comments();
+    canvas();
+	// document.getElementById("myImage").src = "img/" + word + ".png";
+	//document.getElementById("myword").innerHTML = word;
+	document.getElementById("hold").style.display = "block";
+  }
+
+  play();
+  showClue.innerHTML = "Magyarul: - " + splittedWord[1];
+  showNemet.innerHTML = "Németül: - ";
+  //scoreField.innerHTML = "Pontok: " + score;
+  
+  // Hint
+
+    hint.onclick = function() {
+
+      //hints = [["csalad","anya"]];
+	  //hints = ["csalad","anya","közelben","nagyapa"];
+
+    // var catagoryIndex = categories.indexOf(chosenCategory);
+	
+    //var hintIndex = chosenCategory.indexOf(word);
+	//console.log(index);
+	//showClue.innerHTML = "Magyarul: - " + hints[index];
+	//showClue.innerHTML = "Magyarul: - " + splittedWord[1];
+	showNemet.innerHTML = "Németül: - " + splittedWord[0];
+    // showClue.innerHTML = "Clue: - " +  hints [catagoryIndex][hintIndex];
+  };
+
+   // Reset
+
+  document.getElementById('reset').onclick = function() {
+    correct.parentNode.removeChild(correct);
+    letters.parentNode.removeChild(letters);
+    //showClue.innerHTML = "";
+	showNemet.innerHTML = "Németül: - ";
+    context.clearRect(0, 0, 400, 400);
+    play();
+	showClue.innerHTML = "Magyarul: - " + splittedWord[1];
+  }
+  
+//  document.getElementById('add').onclick = function() {
+//	name = document.getElementById("name").value;
+//	if(name !== null && name !== ''){
+//		console.log(name);
+//		document.getElementById("add").disabled = true;
+//	}
+// }
+}
+	
+    </script>
+	<style>
+
+/* Mixin's */ 
+
+@mixin transition {
+  -webkit-transition: all 0.5s ease-in-out;
+  -moz-transition: all 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
+}
+
+@mixin clear {
+  &:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+}
+
+ @mixin box-size {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+ @mixin transition {
+  -webkit-transition: all 0.3s ease-in-out;
+  -moz-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+
+@mixin fade {
+  -moz-transition: all 1s ease-in;
+  -moz-transition:all 0.3s ease-in-out;
+  -webkit-transition:all 0.3s ease-in-out;
+}
+
+@mixin opacity {
+  opacity:0.4;
+  filter:alpha(opacity=40); 
+  @include fade;
+}
+
+@mixin corners ($radius) {
+  -moz-border-radius: $radius;
+  -webkit-border-radius: $radius;
+  border-radius: $radius; 
+  -khtml-border-radius: $radius; 
+}
+
+body {
+  background:#c8c6c7;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+  color:#fff;
+  height:100%;
+  text-align:center;
+  font-size:15px;
+}
+
+.wrappper{
+  @include clear;
+  width:100%;
+  margin:0 auto;
+}
+
+
+canvas{
+  color:#fff;
+  border: #fff dashed 2px;
+  padding:5px;
+}
+
+h1, h2, h3 {
+	font-family: 'Roboto', sans-serif;
+	font-weight: 100;
+	text-transform: uppercase;
+   margin:5px 0;
+}
+
+h1 {
+	font-size: 2.6em;
+}
+
+h2 {
+	font-size: 1.6em;
+}
+
+p{
+  font-size: 1em;
+}
+
+#alphabet {
+  @include clear;
+  padding:0;
+  max-width:100%;
+}
+
+#alphabet button {
+  float:initial;
+  margin: 0 5px 5px 0;
+  list-style:none;
+  width:35px;
+  height: 30px;
+  <!--height:20px;-->
+  padding-top:5px;
+  background:#fff;
+  <!--color:#2e5ad7;-->
+  cursor:pointer;
+  <!--border: solid 1px #fff;-->
+    
+    &:hover{
+      background:#2e5ad7;
+      border: solid 1px #fff;
+      color:#fff;
+    }
+}
+
+#buttons {
+	height: 100px;
+}
+
+#myImage {
+	padding-top:5px;
+}
+
+#my-word {
+  margin: 0;
+  display: block;
+  padding: 0;
+  display:block;
+}
+
+#my-word li {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  display: inline-block;
+  padding: 0 10px;
+  font-size:1.6em;
+}
+
+.active {
+  @include opacity;
+  cursor:default;
+    
+  &:hover{
+      @include fade;
+      @include opacity;
+    }
+}
+
+#mylives{
+  font-size:1em;
+  text-align:center;
+  display:block;
+}
+
+@media (max-width: 767px) {
+  #alphabet {
+  padding:0 0 0 0;
+}
+  }
+
+  @media (max-width: 480px) {
+  #alphabet {
+  padding:0 0 0 0;
+}
+  }
+	</style>
+    <div class="container">
+   <p>Na mi lehet Németül?</p><!-- <input type="text" id="name" name="fname"></input>
+   <button class="btn btn-default btn-sm" id="add">Add</button> -->
+</div>
+<div class="wrapper">
+    <div id="buttons">
+    </div>
+	<br><br><br><br>
+	<br></br>
+	<br></br>
+	<br></br>
+    <div id="hold" style="display: block;">
+    </div>
+	<!-- <img id="myImage" style="width:150px"> -->
+	<p id="myword"></p>
+    <p id="mylives"></p>
+    <p id="clue">Clue -</p>
+	<p id="nemetul">Németül: </p>
+	<!-- <p id="score">Pontok: </p> -->
+	<canvas id="stickman">This Text will show if the Browser does NOT support HTML5 Canvas tag</canvas>
+    <div class="container">
+      <button class="btn btn-default btn-sm" id="hint">Németül</button>
+      <button class="btn btn-default btn-sm" id="reset">Új játék</button>
+    </div>
+</div>
+    
+    </body>
+</html>
